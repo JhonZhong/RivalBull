@@ -1,4 +1,4 @@
-/* Verda 全局类型定义 —— 前后端契约 */
+/* RivalBull 全局类型定义 —— 前后端契约 */
 
 export type ExpertLevel = 'L1' | 'L2' | 'L3'
 export type ExpertGroup = 'decision' | 'strategy' | 'industry' | 'function'
@@ -190,6 +190,7 @@ export interface Report {
   query?: string
   brands?: string[]
   mode?: string
+  model_selection?: string
   created_at: string
   experts: string[]
   dispatch?: { id: string; reason: string }[]

@@ -1,7 +1,8 @@
+import { BullMark } from '../components/BullMark'
 import { useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import * as d3 from 'd3'
-import { ChevronLeft, Network } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { useReportStore } from '../store/reportStore'
 
 interface GNode extends d3.SimulationNodeDatum {
@@ -16,9 +17,9 @@ interface GLink extends d3.SimulationLinkDatum<GNode> {
 }
 
 const COLOR: Record<string, string> = {
-  report: '#5E7A66',
-  claim: '#7C9885',
-  evidence: '#E0B775',
+  report: '#3f6036',
+  claim: '#547548',
+  evidence: '#c99a44',
 }
 const RADIUS: Record<string, number> = { report: 22, claim: 13, evidence: 8 }
 
@@ -81,7 +82,7 @@ export default function GraphPage() {
 
     const link = g
       .append('g')
-      .attr('stroke', '#E3E8E3')
+      .attr('stroke', '#e0e3d3')
       .attr('stroke-width', 1.4)
       .selectAll('line')
       .data(links)
@@ -126,7 +127,7 @@ export default function GraphPage() {
       .attr('x', (d) => RADIUS[d.type] + 5)
       .attr('y', 4)
       .attr('font-size', (d) => (d.type === 'report' ? 14 : 11))
-      .attr('fill', '#3A413C')
+      .attr('fill', '#34402f')
 
     node.append('title').text((d) => d.label)
 
@@ -153,7 +154,7 @@ export default function GraphPage() {
         >
           <ChevronLeft size={20} />
         </button>
-        <Network size={18} className="text-primary" />
+        <BullMark size={24} className="text-primary" />
         <span className="text-aux font-semibold text-ink">知识图谱 · 结论与证据溯源网络</span>
         <div className="ml-auto flex items-center gap-4 text-tag text-ink-2">
           <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full" style={{ background: COLOR.report }} /> 报告</span>

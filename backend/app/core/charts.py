@@ -1,22 +1,22 @@
-"""ECharts option 生成（莫兰迪配色）。后端报告内联图表用，PNG 由 verda-charts skill 另出。"""
+"""ECharts option 生成：RivalBull 牧场配色，用于真实报告图表。"""
 from __future__ import annotations
 
 from typing import Any, Dict, List
 
-MORANDI = {
-    "primary": "#7C9885",
-    "sun": "#F4E2B8",
-    "info": "#8FA8C0",
-    "risk": "#CE9A92",
-    "soft": "#A8C0A8",
-    "ink": "#3A413C",
-    "ink2": "#6B746C",
-    "line": "#E3E8E3",
+PASTURE = {
+    "primary": "#547548",
+    "sun": "#F6D78C",
+    "info": "#759AA8",
+    "risk": "#BB7665",
+    "soft": "#AFC69A",
+    "ink": "#34402F",
+    "ink2": "#626B58",
+    "line": "#E0E3D3",
 }
-SERIES = ["#7C9885", "#E0B775", "#8FA8C0", "#CE9A92", "#A8C0A8", "#C2B59B"]
-SENTIMENT = {"pos": "#8AB58A", "neu": "#C9CFC9", "neg": "#CE9A92"}
+SERIES = ["#547548", "#C99A44", "#759AA8", "#BB7665", "#AFC69A", "#C2B59B"]
+SENTIMENT = {"pos": "#789B61", "neu": "#C9CFC9", "neg": "#BB7665"}
 
-_BASE_TEXT = {"color": MORANDI["ink2"], "fontFamily": "Inter, Noto Sans SC, sans-serif"}
+_BASE_TEXT = {"color": PASTURE["ink2"], "fontFamily": "Nunito, Noto Sans SC, sans-serif"}
 
 
 def _grid() -> Dict[str, Any]:
@@ -32,14 +32,14 @@ def feature_radar(title: str, dimensions: List[str], series: List[Dict[str, Any]
         for i, s in enumerate(series)
     ]
     return {
-        "title": {"text": title, "left": "center", "textStyle": {"color": MORANDI["ink"], "fontSize": 15}},
+        "title": {"text": title, "left": "center", "textStyle": {"color": PASTURE["ink"], "fontSize": 15}},
         "tooltip": {},
         "legend": {"bottom": 0, "textStyle": _BASE_TEXT},
         "radar": {
             "indicator": indicator,
-            "splitLine": {"lineStyle": {"color": MORANDI["line"]}},
-            "splitArea": {"areaStyle": {"color": ["#FAFBF9", "#FFFFFF"]}},
-            "axisName": {"color": MORANDI["ink2"]},
+            "splitLine": {"lineStyle": {"color": PASTURE["line"]}},
+            "splitArea": {"areaStyle": {"color": ["#FAF8EF", "#FFFFFF"]}},
+            "axisName": {"color": PASTURE["ink2"]},
         },
         "series": [{"type": "radar", "data": data, "symbolSize": 5}],
     }
@@ -47,16 +47,16 @@ def feature_radar(title: str, dimensions: List[str], series: List[Dict[str, Any]
 
 def pricing_bar(title: str, products: List[str], values: List[float]) -> Dict[str, Any]:
     return {
-        "title": {"text": title, "left": "center", "textStyle": {"color": MORANDI["ink"], "fontSize": 15}},
+        "title": {"text": title, "left": "center", "textStyle": {"color": PASTURE["ink"], "fontSize": 15}},
         "tooltip": {"trigger": "axis"},
         "grid": _grid(),
-        "xAxis": {"type": "category", "data": products, "axisLine": {"lineStyle": {"color": MORANDI["line"]}},
-                  "axisLabel": {"color": MORANDI["ink2"]}},
-        "yAxis": {"type": "value", "name": "￥/月", "splitLine": {"lineStyle": {"color": MORANDI["line"]}},
-                  "axisLabel": {"color": MORANDI["ink2"]}},
+        "xAxis": {"type": "category", "data": products, "axisLine": {"lineStyle": {"color": PASTURE["line"]}},
+                  "axisLabel": {"color": PASTURE["ink2"]}},
+        "yAxis": {"type": "value", "name": "￥/月", "splitLine": {"lineStyle": {"color": PASTURE["line"]}},
+                  "axisLabel": {"color": PASTURE["ink2"]}},
         "series": [{
             "type": "bar", "data": values, "barWidth": "46%",
-            "itemStyle": {"color": MORANDI["primary"], "borderRadius": [8, 8, 0, 0]},
+            "itemStyle": {"color": PASTURE["primary"], "borderRadius": [8, 8, 0, 0]},
         }],
     }
 
@@ -65,7 +65,7 @@ def market_donut(title: str, shares: List[Dict[str, Any]]) -> Dict[str, Any]:
     data = [{"name": s["name"], "value": s["value"],
              "itemStyle": {"color": SERIES[i % len(SERIES)]}} for i, s in enumerate(shares)]
     return {
-        "title": {"text": title, "left": "center", "textStyle": {"color": MORANDI["ink"], "fontSize": 15}},
+        "title": {"text": title, "left": "center", "textStyle": {"color": PASTURE["ink"], "fontSize": 15}},
         "tooltip": {"trigger": "item"},
         "legend": {"bottom": 0, "textStyle": _BASE_TEXT},
         "series": [{
@@ -81,7 +81,7 @@ def sentiment_donut(title: str, overall: Dict[str, int]) -> Dict[str, Any]:
     data = [{"name": label[k], "value": overall.get(k, 0), "itemStyle": {"color": SENTIMENT[k]}}
             for k in ("pos", "neu", "neg")]
     return {
-        "title": {"text": title, "left": "center", "textStyle": {"color": MORANDI["ink"], "fontSize": 15}},
+        "title": {"text": title, "left": "center", "textStyle": {"color": PASTURE["ink"], "fontSize": 15}},
         "tooltip": {"trigger": "item", "formatter": "{b}: {d}%"},
         "legend": {"bottom": 0, "textStyle": _BASE_TEXT},
         "series": [{
@@ -98,16 +98,16 @@ def platform_bar(title: str, by_platform: Dict[str, Dict[str, int]]) -> Dict[str
     names = [PLATFORM_LABEL[p] for p in plats]
     totals = [sum(by_platform[p].values()) for p in plats]
     return {
-        "title": {"text": title, "left": "center", "textStyle": {"color": MORANDI["ink"], "fontSize": 15}},
+        "title": {"text": title, "left": "center", "textStyle": {"color": PASTURE["ink"], "fontSize": 15}},
         "tooltip": {"trigger": "axis"},
         "grid": _grid(),
-        "xAxis": {"type": "value", "splitLine": {"lineStyle": {"color": MORANDI["line"]}},
-                  "axisLabel": {"color": MORANDI["ink2"]}},
+        "xAxis": {"type": "value", "splitLine": {"lineStyle": {"color": PASTURE["line"]}},
+                  "axisLabel": {"color": PASTURE["ink2"]}},
         "yAxis": {"type": "category", "data": list(reversed(names)),
-                  "axisLabel": {"color": MORANDI["ink2"]}, "axisLine": {"lineStyle": {"color": MORANDI["line"]}}},
+                  "axisLabel": {"color": PASTURE["ink2"]}, "axisLine": {"lineStyle": {"color": PASTURE["line"]}}},
         "series": [{
             "type": "bar", "data": list(reversed(totals)), "barWidth": "50%",
-            "itemStyle": {"color": MORANDI["info"], "borderRadius": [0, 8, 8, 0]},
+            "itemStyle": {"color": PASTURE["info"], "borderRadius": [0, 8, 8, 0]},
         }],
     }
 
@@ -127,14 +127,14 @@ def trend_line(title: str, x: List[str], series: List[Dict[str, Any]],
             "data": ser["values"],
         })
     return {
-        "title": {"text": title, "left": "center", "textStyle": {"color": MORANDI["ink"], "fontSize": 15}},
+        "title": {"text": title, "left": "center", "textStyle": {"color": PASTURE["ink"], "fontSize": 15}},
         "tooltip": {"trigger": "axis"},
         "legend": {"bottom": 0, "textStyle": _BASE_TEXT},
         "grid": _grid(),
         "xAxis": {"type": "category", "boundaryGap": False, "data": x,
-                  "axisLabel": {"color": MORANDI["ink2"]}, "axisLine": {"lineStyle": {"color": MORANDI["line"]}}},
-        "yAxis": {"type": "value", "name": y_name, "splitLine": {"lineStyle": {"color": MORANDI["line"]}},
-                  "axisLabel": {"color": MORANDI["ink2"]}},
+                  "axisLabel": {"color": PASTURE["ink2"]}, "axisLine": {"lineStyle": {"color": PASTURE["line"]}}},
+        "yAxis": {"type": "value", "name": y_name, "splitLine": {"lineStyle": {"color": PASTURE["line"]}},
+                  "axisLabel": {"color": PASTURE["ink2"]}},
         "series": s,
     }
 
@@ -155,20 +155,20 @@ def five_forces_radar(title: str, forces: Dict[str, Any]) -> Dict[str, Any]:
     indicator = [{"name": _FORCE_LABEL[k], "max": 100} for k in keys]
     values = [forces[k] for k in keys]
     return {
-        "title": {"text": title, "left": "center", "textStyle": {"color": MORANDI["ink"], "fontSize": 15}},
+        "title": {"text": title, "left": "center", "textStyle": {"color": PASTURE["ink"], "fontSize": 15}},
         "tooltip": {},
         "radar": {
             "indicator": indicator,
-            "splitLine": {"lineStyle": {"color": MORANDI["line"]}},
-            "splitArea": {"areaStyle": {"color": ["#FAFBF9", "#FFFFFF"]}},
-            "axisName": {"color": MORANDI["ink2"], "fontSize": 11},
+            "splitLine": {"lineStyle": {"color": PASTURE["line"]}},
+            "splitArea": {"areaStyle": {"color": ["#FAF8EF", "#FFFFFF"]}},
+            "axisName": {"color": PASTURE["ink2"], "fontSize": 11},
         },
         "series": [{
             "type": "radar",
             "data": [{"value": values, "name": "竞争压力",
-                      "lineStyle": {"color": MORANDI["risk"]},
-                      "itemStyle": {"color": MORANDI["risk"]},
-                      "areaStyle": {"opacity": 0.18, "color": MORANDI["risk"]}}],
+                      "lineStyle": {"color": PASTURE["risk"]},
+                      "itemStyle": {"color": PASTURE["risk"]},
+                      "areaStyle": {"opacity": 0.18, "color": PASTURE["risk"]}}],
             "symbolSize": 5,
         }],
     }
@@ -177,17 +177,17 @@ def five_forces_radar(title: str, forces: Dict[str, Any]) -> Dict[str, Any]:
 def growth_bar(title: str, products: List[str], values: List[float], y_name: str = "%") -> Dict[str, Any]:
     """通用增速/对比柱状图（带正负色区分）。"""
     data = [{"value": v,
-             "itemStyle": {"color": MORANDI["primary"] if v >= 0 else MORANDI["risk"],
+             "itemStyle": {"color": PASTURE["primary"] if v >= 0 else PASTURE["risk"],
                            "borderRadius": [8, 8, 0, 0] if v >= 0 else [0, 0, 8, 8]}}
             for v in values]
     return {
-        "title": {"text": title, "left": "center", "textStyle": {"color": MORANDI["ink"], "fontSize": 15}},
+        "title": {"text": title, "left": "center", "textStyle": {"color": PASTURE["ink"], "fontSize": 15}},
         "tooltip": {"trigger": "axis"},
         "grid": _grid(),
-        "xAxis": {"type": "category", "data": products, "axisLine": {"lineStyle": {"color": MORANDI["line"]}},
-                  "axisLabel": {"color": MORANDI["ink2"]}},
-        "yAxis": {"type": "value", "name": y_name, "splitLine": {"lineStyle": {"color": MORANDI["line"]}},
-                  "axisLabel": {"color": MORANDI["ink2"]}},
+        "xAxis": {"type": "category", "data": products, "axisLine": {"lineStyle": {"color": PASTURE["line"]}},
+                  "axisLabel": {"color": PASTURE["ink2"]}},
+        "yAxis": {"type": "value", "name": y_name, "splitLine": {"lineStyle": {"color": PASTURE["line"]}},
+                  "axisLabel": {"color": PASTURE["ink2"]}},
         "series": [{"type": "bar", "data": data, "barWidth": "46%"}],
     }
 
@@ -204,13 +204,13 @@ def sentiment_timeline(title: str, timeline: List[Dict[str, Any]]) -> Dict[str, 
         }
 
     return {
-        "title": {"text": title, "left": "center", "textStyle": {"color": MORANDI["ink"], "fontSize": 15}},
+        "title": {"text": title, "left": "center", "textStyle": {"color": PASTURE["ink"], "fontSize": 15}},
         "tooltip": {"trigger": "axis"},
         "legend": {"bottom": 0, "textStyle": _BASE_TEXT},
         "grid": _grid(),
         "xAxis": {"type": "category", "boundaryGap": False, "data": dates,
-                  "axisLabel": {"color": MORANDI["ink2"]}, "axisLine": {"lineStyle": {"color": MORANDI["line"]}}},
-        "yAxis": {"type": "value", "splitLine": {"lineStyle": {"color": MORANDI["line"]}},
-                  "axisLabel": {"color": MORANDI["ink2"]}},
+                  "axisLabel": {"color": PASTURE["ink2"]}, "axisLine": {"lineStyle": {"color": PASTURE["line"]}}},
+        "yAxis": {"type": "value", "splitLine": {"lineStyle": {"color": PASTURE["line"]}},
+                  "axisLabel": {"color": PASTURE["ink2"]}},
         "series": [ser("pos", "正面"), ser("neu", "中性"), ser("neg", "负面")],
     }

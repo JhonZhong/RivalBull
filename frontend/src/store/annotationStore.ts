@@ -51,6 +51,7 @@ interface AnnotationState {
   isInKB: (reportId: string, dedupeKey: string) => boolean
 }
 
+// Retain these storage identifiers so existing annotations and saved knowledge survive rebranding.
 const LS_KEY = 'verda.annotations.v1'
 const LS_KB = 'verda.knowledge.v1'
 

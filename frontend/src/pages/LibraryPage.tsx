@@ -37,14 +37,14 @@ export default function LibraryPage() {
       ) : reports.length === 0 ? (
         <div className="mt-16 flex flex-col items-center justify-center gap-4 text-center">
           <img
-            src="/assets/brand/empty-state.png"
-            alt="empty"
+            src="/assets/brand/empty-state.svg"
+            alt="牛牛等待开启第一次调研"
             className="h-40 w-40 object-contain opacity-90"
             onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
           />
           <div>
             <div className="text-h3 text-ink">还没有调研记录</div>
-            <p className="mt-1 text-aux text-ink-2">发起你的第一次竞品分析，48 位专家即刻就位</p>
+            <p className="mt-1 text-aux text-ink-2">发起你的第一次竞品分析，48 位牛牛专家即刻就位</p>
           </div>
           <button
             onClick={() => navigate('/')}
@@ -69,7 +69,7 @@ export default function LibraryPage() {
             >
               <div className="relative h-32 overflow-hidden">
                 <img
-                  src={r.cover_image ?? '/assets/brand/report-cover.png'}
+                  src="/assets/brand/report-cover.svg"
                   alt={r.title}
                   className="h-full w-full object-cover transition-transform group-hover:scale-105"
                   onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}

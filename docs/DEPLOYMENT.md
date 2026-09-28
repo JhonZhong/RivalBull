@@ -1,6 +1,6 @@
 # 部署说明 · Deployment
 
-本文档说明青野 Verda 的本地运行与 Vercel 云部署，以及 `backend/` 与 `api/` 两份后端代码的同步约定。
+本文档说明 RivalBull 的本地运行与 Vercel 云部署，以及 `backend/` 与 `api/` 两份后端代码的同步约定。
 
 ---
 
@@ -17,7 +17,7 @@
 cd backend
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
-cp .env.example .env          # 填入 ZHIPU_API_KEY 等密钥
+cp .env.example .env          # 填入 LLM_API_KEY、BOCHA_API_KEY 等密钥
 .venv/bin/python -m uvicorn app.main:app --reload --port 8010
 ```
 
@@ -65,10 +65,14 @@ npm run dev                    # http://localhost:3400
 
 1. 在 [Vercel](https://vercel.com/) 导入本仓库。
 2. 在 **Project Settings → Environment Variables** 配置密钥（**切勿**把 `.env` 提交到仓库）：
-   - `ZHIPU_API_KEY`（必填）
+   - `LLM_API_KEY`（模型密钥；默认小米 MiMo）
+   - `LLM_BASE_URL`（默认 `https://token-plan-cn.xiaomimimo.com/v1`）
+   - `LLM_MODEL` / `LLM_MODEL_CORE` / `LLM_MODEL_AUX` / `LLM_MODEL_FAST`（可选，默认分别为 Flash / Pro / Flash / Flash）
    - `BOCHA_API_KEY`（联网采集必填）
-   - 其余可选：`ZHIPU_MODEL*` / `DOUYIN_COOKIE` / `BILIBILI_COOKIE` / `XHS_COOKIE` / `ENABLE_DEMO_FALLBACK`
+   - 其余可选：`DOUYIN_COOKIE` / `BILIBILI_COOKIE` / `XHS_COOKIE` / `ENABLE_DEMO_FALLBACK`
 3. 触发部署。前端构建产物输出到 `frontend/dist`，`/api/*` 与 `/health` 路由到 Serverless 函数 `api/index.py`。
+
+旧智谱部署仍支持只配置 `ZHIPU_API_KEY`：未显式指定的地址和模型沿用智谱默认值（`https://open.bigmodel.cn/api/paas/v4`；默认/核心/辅助/快速模型依次为 `glm-5.1` / `glm-5.2` / `glm-5.1` / `glm-z1-air`）。`LLM_API_KEY` 或 `MIMO_API_KEY` 优先于旧密钥；切换供应商时应一起更新密钥、地址和模型，清理不再使用的旧变量。显式 `LLM_*` 配置优先于对应的 `ZHIPU_*` 配置。
 
 > **SQLite 与持久化注意**：Vercel Serverless 文件系统是只读的，运行时仅 `/tmp` 可写且不跨实例持久化。云端部署下数据库不具备本地那样的持久能力，适合演示；生产环境建议替换为托管数据库。
 

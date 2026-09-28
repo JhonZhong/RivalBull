@@ -1,3 +1,4 @@
+import { BullMark } from '../components/BullMark'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft, Cpu, Clock, Filter } from 'lucide-react'
@@ -34,9 +35,10 @@ export default function TracePage() {
         <button onClick={() => navigate(`/report/${reportId}`)} className="grid h-9 w-9 place-items-center rounded-btn text-ink-2 hover:bg-primary-tint">
           <ChevronLeft size={20} />
         </button>
+        <BullMark size={26} className="text-primary" />
         <div className="flex-1">
-          <div className="text-aux font-semibold text-ink">Agent 决策链路 · Trace</div>
-          <div className="text-tag text-ink-3">每个 Agent 的 Prompt / 输出 / Token / 决策全程可查可追溯</div>
+          <div className="text-aux font-semibold text-ink">牛牛决策链路 · Trace</div>
+          <div className="text-tag text-ink-3">每位牛牛的 Prompt / 输出 / Token / 决策全程可查可追溯</div>
         </div>
         <div className="flex items-center gap-3 text-tag text-ink-2">
           <span className="inline-flex items-center gap-1"><Cpu size={13} /> {totalTokens.toLocaleString()} tokens</span>
