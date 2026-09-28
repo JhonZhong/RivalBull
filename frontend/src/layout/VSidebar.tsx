@@ -1,3 +1,4 @@
+import { BullMark } from '../components/BullMark'
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
@@ -5,7 +6,6 @@ import {
   BarChart3,
   Users,
   Radar,
-  Sprout,
   ChevronDown,
   Library,
 } from 'lucide-react'
@@ -15,7 +15,7 @@ const navItems = [
   { to: '/', label: '工作台', icon: Home, end: true },
   { to: '/library', label: '我的调研', icon: BarChart3 },
   { to: '/knowledge', label: '知识库', icon: Library },
-  { to: '/experts', label: '专家公会', icon: Users },
+  { to: '/experts', label: '牛牛牧场', icon: Users },
   { to: '/dashboard', label: '竞争情报中心', icon: Radar },
 ]
 
@@ -34,17 +34,17 @@ export default function VSidebar() {
   }, [])
 
   return (
-    <aside className="relative flex h-full w-[220px] shrink-0 flex-col border-r border-line bg-card/70">
+    <aside className="pasture-sidebar relative flex h-full w-[220px] shrink-0 flex-col border-r border-line bg-card/70">
       {/* Logo */}
       <button
         onClick={() => navigate('/')}
         className="flex items-center gap-2.5 px-6 pt-6 pb-7"
       >
         <span className="grid h-9 w-9 place-items-center rounded-btn bg-primary-tint text-primary">
-          <Sprout size={22} strokeWidth={1.8} />
+          <BullMark size={22} strokeWidth={1.8} />
         </span>
         <span className="text-[20px] font-semibold tracking-tight text-ink">
-          Verda
+          RivalBull
         </span>
       </button>
 
@@ -53,11 +53,12 @@ export default function VSidebar() {
         {navItems.map((item) => (
           <NavLink
             key={item.to}
+            title={item.label}
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
               [
-                'flex h-11 items-center gap-3 rounded-btn px-3.5 text-[15px] transition-all ease-verda',
+                'flex h-11 items-center gap-3 rounded-btn px-3.5 text-[15px] transition-all ease-bull',
                 isActive
                   ? 'bg-primary-tint font-medium text-primary-deep'
                   : 'text-ink-2 hover:bg-primary-tint/50',
@@ -65,7 +66,7 @@ export default function VSidebar() {
             }
           >
             <item.icon size={19} strokeWidth={1.8} />
-            <span>{item.label}</span>
+            <span className="nav-label">{item.label}</span>
           </NavLink>
         ))}
       </nav>
@@ -73,8 +74,8 @@ export default function VSidebar() {
       {/* 工作空间用量卡片 */}
       <div className="mx-3 mb-3 rounded-card border border-line/70 bg-primary-tint/40 p-4">
         <div className="flex items-center gap-2">
-          <Sprout size={16} className="text-primary" strokeWidth={2} />
-          <span className="text-aux font-semibold text-ink">我的工作空间</span>
+          <BullMark size={16} className="text-primary" strokeWidth={2} />
+          <span className="text-aux font-semibold text-ink">我的牧场</span>
         </div>
         <p className="mt-1 text-tag text-ink-3">累计完成 {reports} 次调研</p>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-chip bg-line">
@@ -89,11 +90,11 @@ export default function VSidebar() {
       {/* 底部用户 */}
       <div className="flex items-center gap-3 border-t border-line px-4 py-3.5">
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sun text-[13px] font-semibold text-ink">
-          研
+          牛
         </span>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-aux font-medium text-ink">林研究员</div>
-          <div className="truncate text-tag text-ink-3">青野科技</div>
+          <div className="truncate text-aux font-medium text-ink">牧场访客</div>
+          <div className="truncate text-tag text-ink-3">欢迎来到 RivalBull</div>
         </div>
         <ChevronDown size={16} className="text-ink-3" />
       </div>

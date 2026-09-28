@@ -1,6 +1,10 @@
-# 青野 Verda · AI 竞品情报工作台
+# RivalBull · AI 竞品情报工作台
 
-> 让每个结论都有出处，让每次调研都活着。
+> 48 位牛牛协作的竞品情报牧场。让每个结论都有出处。
+
+本分支采用可爱牧场与扁平绘本风，董事长为钟钟牛。[完整名册与改造说明](./docs/RIVALBULL_REBRAND.md) · [本地启动与密钥配置](./docs/LOCAL_SETUP.md)。
+
+基于 [VerdaAI-Investigator](https://github.com/kangjiayao14/VerdaAI-Investigator) 开发，保留原项目许可证与上游设计文档。
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -8,14 +12,14 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Built with TRAE](https://img.shields.io/badge/Built%20with-TRAE%20AI-7C5CFF.svg)](https://www.trae.ai/)
 
-青野 Verda 是一个**会自己组队、能溯源、看得见思考过程**的「AI 竞品情报工作台」。
-它把一支由 48 位虚拟专家组成的多 Agent 团队封装进一条 Deep Research 流水线：从澄清需求、真实联网采集、交叉验证、结构化分析，到并行撰写一份带证据溯源的竞品研究报告——全程可观测、可回放、可人工介入二次深化。
+RivalBull 是一个**会自己组队、能溯源、看得见思考过程**的「AI 竞品情报工作台」。
+它把一支由 48 位牛牛专家组成的多 Agent 团队封装进一条 Deep Research 流水线：从澄清需求、真实联网采集、交叉验证、结构化分析，到并行撰写一份带证据溯源的竞品研究报告——全程可观测、可回放、可人工介入二次深化。
 
-- **真实，不演示**：真实 LLM（智谱 GLM）+ 真实联网搜索（博查 Bocha）+ 真实网页抓取 + SQLite 持久化。搜不到就如实标注「未采集到」，绝不编造假数据。
+- **真实，不演示**：真实 LLM（小米 MiMo）+ 真实联网搜索（博查 Bocha）+ 真实网页抓取 + SQLite 持久化。搜不到就如实标注「未采集到」，绝不编造假数据。
 - **每个结论都有出处**：四条铁律——无证据不立论 / 交叉验证 / 返工闭环 / 全程可观测。
 - **看得见的思考**：每个 Agent 的 Prompt、输入输出、Token、决策、引用证据全部落 Trace，可在工作台实时滚动、在报告页「决策回放」。
 
-> 本项目在开发过程中深度使用 [TRAE](https://www.trae.ai/) AI 编程工具协作完成，设计与演进过程见 [docs/系统升级实施方案.md](./docs/系统升级实施方案.md)。
+> 上游项目在开发过程中深度使用 [TRAE](https://www.trae.ai/) AI 编程工具协作完成，设计与演进过程见 [docs/系统升级实施方案.md](./docs/系统升级实施方案.md)。
 
 ---
 
@@ -41,7 +45,7 @@
 
 **后端**：FastAPI · LangGraph 风格编排 · SQLite · SSE（Server-Sent Events 思维流）
 
-**LLM**：智谱 GLM（BigModel 开放平台，OpenAI 兼容网关）。核心章 `glm-5.2`、辅助章 `glm-5.1`、杂务 `glm-z1-air`，多模型按章节分配以充分利用并发额度
+**LLM**：小米 MiMo（OpenAI 兼容接口）。自动分工使用 `mimo-v2.6-pro` 处理核心章节，`mimo-v2.6-flash` 处理辅助/杂务；首页也可选择整个任务使用 Pro 或 Flash。
 
 **搜索**：博查 Bocha Web Search
 
@@ -99,7 +103,7 @@ cd verda
 
 # 配置后端密钥（绝不硬编码，全部走环境变量）
 cp backend/.env.example backend/.env
-# 编辑 backend/.env，填入 ZHIPU_API_KEY 等（见下方「配置密钥」）
+# 编辑 backend/.env，填入 LLM_API_KEY 等（见下方「配置密钥」）
 ```
 
 ### 2. 启动后端
@@ -138,8 +142,8 @@ npm run dev
 
 | 变量 | 说明 | 必填 |
 |---|---|---|
-| `ZHIPU_API_KEY` | 智谱开放平台 API Key（GLM 调用），从 https://open.bigmodel.cn 获取 | 是（真实 LLM 调用） |
-| `ZHIPU_MODEL` / `ZHIPU_MODEL_CORE` / `ZHIPU_MODEL_AUX` / `ZHIPU_MODEL_FAST` | 多模型矩阵（默认 / 核心章 / 辅助章 / 杂务） | 否（有默认值） |
+| `LLM_API_KEY` | 小米 MiMo 服务密钥，见 `.env.example` | 是（真实 LLM 调用） |
+| `LLM_MODEL` / `LLM_MODEL_CORE` / `LLM_MODEL_AUX` / `LLM_MODEL_FAST` | 多模型矩阵（默认 / 核心章 / 辅助章 / 杂务） | 否（有默认值） |
 | `BOCHA_API_KEY` | 博查 Bocha Web Search Key，从 https://open.bocha.cn 获取（形如 `sk-xxxx`） | 真实联网采集时必填 |
 | `DOUYIN_COOKIE` / `BILIBILI_COOKIE` / `XHS_COOKIE` | 各平台舆情采集 cookie | 平台采集时按需 |
 | `APP_PORT` | 后端端口（默认 8000，本地脚本用 8010） | 否 |

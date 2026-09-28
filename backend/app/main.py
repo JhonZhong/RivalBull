@@ -1,20 +1,21 @@
-"""青野 Verda 后端入口（FastAPI）。
+"""RivalBull 后端入口（FastAPI）。
 
 挂载：48 专家 API + 任务创建/澄清 + SSE 思维流 + 报告/历史 + 仪表盘统计
 + 全局证据溯源库 + 竞品监控订阅 + 专家工作量看板 + 健康/验证接口。
-真实 LLM（智谱 GLM）+ 真实搜索（博查 Bocha）+ 真实抓取 + SQLite 持久化，绝不 demo。
+真实 LLM（小米 MiMo）+ 真实搜索（博查 Bocha）+ 真实抓取 + SQLite 持久化，绝不 demo。
 """
 from __future__ import annotations
 
 import json
 from typing import List, Optional
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from app.core import db
+from app.core.model_selection import model_catalog
 from app.core.config import get_settings
 from app.core.llm import LLMNotConfigured, chat
 from app.core.orchestrator import create_task, run_pipeline, submit_clarify, refine_section
@@ -23,7 +24,7 @@ from app.data import expert_by_id, load_experts
 
 settings = get_settings()
 
-app = FastAPI(title="青野 Verda API", version="2.0.0")
+app = FastAPI(title="RivalBull API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,7 +39,7 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {
-        "name": "青野 Verda API",
+        "name": "RivalBull API",
         "version": "2.0.0",
         "slogan": "让每个结论都有出处，让每次调研都活着。",
         "llm_configured": settings.llm_configured,
@@ -61,7 +62,7 @@ def llm_ping():
             ],
             max_tokens=200,
         )
-        return {"ok": True, "model": settings.zhipu_model, "reply": reply.strip()}
+        return {"ok": True, "model": settings.llm_model, "reply": reply.strip()}
     except LLMNotConfigured as e:
         return {"ok": False, "reason": "not_configured", "message": str(e)}
     except Exception as e:  # noqa: BLE001
@@ -77,10 +78,18 @@ def search_endpoint(q: str, num: int = 10, site: Optional[str] = None):
         return {"ok": False, "query": q, "reason": "error", "message": str(e)}
 
 
+@app.get("/api/models")
+def list_models():
+    return model_catalog()
+
+
 # ── 专家 ────────────────────────────────────────────────
 @app.get("/api/experts")
 def list_experts():
-    return load_experts()
+    workload = {s["expert_id"]: s for s in db.expert_workload()}
+    return [{**e, "stats": {**e.get("stats", {}),
+                           "missions": workload.get(e["id"], {}).get("missions", 0)}}
+            for e in load_experts()]
 
 
 @app.get("/api/experts/workload")
@@ -118,11 +127,15 @@ def get_expert(eid: str):
 class CreateTaskBody(BaseModel):
     query: str
     mode: str = "deep"  # quick | deep | expert
+    model: str = "auto"
 
 
 @app.post("/api/tasks")
 def post_task(body: CreateTaskBody):
-    return create_task(body.query, mode=body.mode)
+    try:
+        return create_task(body.query, mode=body.mode, model=body.model)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 class ClarifyBody(BaseModel):

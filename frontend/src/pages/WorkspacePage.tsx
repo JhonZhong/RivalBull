@@ -1,8 +1,8 @@
+import { BullMark } from '../components/BullMark'
 import { useEffect } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Sprout,
   ChevronLeft,
   Users,
   Activity,
@@ -64,7 +64,7 @@ export default function WorkspacePage() {
           <ChevronLeft size={20} />
         </button>
         <span className="grid h-8 w-8 place-items-center rounded-btn bg-primary-tint text-primary">
-          <Sprout size={18} strokeWidth={1.8} />
+          <BullMark size={18} strokeWidth={1.8} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="truncate text-aux font-medium text-ink">{query || '竞品分析任务'}</div>
@@ -93,7 +93,7 @@ export default function WorkspacePage() {
       )}
 
       {/* 三栏主体 */}
-      <div className="grid min-h-0 flex-1 grid-cols-[280px_1fr_340px]">
+      <div className="workspace-columns grid min-h-0 flex-1 grid-cols-[280px_1fr_340px]">
         {/* 左：DAG 指挥台 + 团队 */}
         <aside className="flex min-h-0 flex-col gap-5 overflow-y-auto border-r border-line bg-card/40 p-5">
           <div>
@@ -105,7 +105,7 @@ export default function WorkspacePage() {
 
           <div>
             <div className="mb-2 flex items-center gap-1.5 text-aux font-semibold text-ink">
-              <Users size={15} className="text-primary" /> 专家队（{teamMembers.length}）
+              <Users size={15} className="text-primary" /> 牛牛团队（{teamMembers.length}）
             </div>
             <div className="flex flex-wrap gap-1.5">
               {teamMembers.map((id) => {
@@ -137,9 +137,9 @@ export default function WorkspacePage() {
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
                 >
-                  <Sprout size={32} className="text-primary-soft" />
+                  <BullMark size={32} className="text-primary-soft" />
                 </motion.div>
-                <p className="text-aux">专家队正在集结，马上开始……</p>
+                <p className="text-aux">牛牛团队正在集结，马上开始……</p>
               </div>
             ) : (
               <VAgentStream thoughts={thoughts} />

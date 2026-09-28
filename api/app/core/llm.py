@@ -1,4 +1,4 @@
-"""智谱 GLM LLM 客户端封装（默认 glm-5-turbo，走 BigModel OpenAI 兼容网关）。
+"""OpenAI 兼容 LLM 客户端，支持小米 MiMo 与智谱 GLM。
 
 - 模型 / APIKEY 走环境变量，不硬编码、不外泄（第 16.4 章）。
 - 支持普通 chat 与流式 chat（供思维流 SSE 使用）。
@@ -17,10 +17,11 @@ from openai import OpenAI
 
 from app.core.config import get_settings
 from app.core import trace
+from app.core.model_selection import resolve_model
 
 
 class LLMNotConfigured(RuntimeError):
-    """未配置 ZHIPU_API_KEY。"""
+    """未配置 LLM_API_KEY。"""
 
 
 _client: OpenAI | None = None
@@ -40,14 +41,14 @@ def _is_rate_limit(err: Exception) -> bool:
 def _get_client() -> OpenAI:
     global _client
     settings = get_settings()
-    if not settings.zhipu_api_key:
+    if not settings.llm_configured:
         raise LLMNotConfigured(
-            "未配置 ZHIPU_API_KEY，请在 backend/.env 中填写智谱开放平台 API Key。"
+            "未配置 LLM_API_KEY，请在运行目录的 backend/.env（部署时 api/.env 或环境变量）中填写模型服务密钥。"
         )
     if _client is None:
         _client = OpenAI(
-            api_key=settings.zhipu_api_key,
-            base_url=settings.zhipu_base_url,
+            api_key=settings.llm_api_key.strip(),
+            base_url=settings.llm_base_url.strip(),
             timeout=settings.llm_timeout,
             max_retries=settings.llm_max_retries,
         )
@@ -58,6 +59,19 @@ def _supports_thinking(model: str) -> bool:
     """判断模型是否支持思考模式开关（glm-5 系列、glm-4.6 支持 thinking 参数）。"""
     m = model.lower()
     return "glm-5" in m or "glm-4.6" in m or "glm-4-6" in m
+
+
+def _completion_options(model: str, max_tokens: int) -> dict:
+    """统一普通/流式请求参数，避免 MiMo 默认思考耗尽章节输出预算。"""
+    if model.lower().startswith("mimo-"):
+        return {
+            "max_completion_tokens": max_tokens,
+            "extra_body": {"thinking": {"type": "disabled"}},
+        }
+    options = {"max_tokens": max_tokens}
+    if _supports_thinking(model):
+        options["extra_body"] = {"thinking": {"type": "disabled"}}
+    return options
 
 
 def _strip_think(text: str) -> str:
@@ -90,7 +104,7 @@ def chat(
     settings = get_settings()
     client = _get_client()
     last_err: Exception | None = None
-    use_model = model or settings.zhipu_model
+    use_model = resolve_model(model or settings.llm_model)
     for delay in [0.0] + _RATE_LIMIT_BACKOFFS:
         if delay:
             time.sleep(delay)
@@ -99,12 +113,8 @@ def chat(
                 model=use_model,
                 messages=messages,  # type: ignore[arg-type]
                 temperature=temperature,
-                max_tokens=max_tokens,
+                **_completion_options(use_model, max_tokens),
             )
-            # 关闭思考模式：glm-5 系列默认开思考，会吃光 token 且更慢；
-            # 调研流水线追求速度与稳定输出，统一关闭（实测质量仍很高）。
-            if _supports_thinking(use_model):
-                kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
             t0 = time.perf_counter()
             resp = client.chat.completions.create(**kwargs)
             latency_ms = int((time.perf_counter() - t0) * 1000)
@@ -206,15 +216,17 @@ def chat_stream(
     """流式返回文本增量（供思维流逐条 append）。"""
     settings = get_settings()
     client = _get_client()
-    use_model = model or settings.zhipu_model
+    use_model = resolve_model(model or settings.llm_model)
     stream = client.chat.completions.create(
         model=use_model,
         messages=messages,  # type: ignore[arg-type]
         temperature=temperature,
-        max_tokens=max_tokens,
+        **_completion_options(use_model, max_tokens),
         stream=True,
     )
     for chunk in stream:
+        if not chunk.choices:
+            continue
         delta = chunk.choices[0].delta.content
         if delta:
             yield delta

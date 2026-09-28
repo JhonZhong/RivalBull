@@ -41,15 +41,23 @@ export async function fetchExperts(): Promise<Expert[]> {
   return (await local.json()) as Expert[]
 }
 
-export async function createTask(query: string, mode: string = 'deep'): Promise<CreateTaskResp> {
+export interface ModelCatalog {
+  options: { id: string; label: string; available: boolean; description: string }[]
+  tiers: { core: string; aux: string; fast: string }
+}
+
+export function fetchModels(): Promise<ModelCatalog> {
+  return safeJson<ModelCatalog>('/api/models')
+}
+
+export async function createTask(query: string, mode: string = 'deep', model = 'auto'): Promise<CreateTaskResp> {
   return safeJson<CreateTaskResp>(
     '/api/tasks',
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, mode }),
+      body: JSON.stringify({ query, mode, model }),
     },
-    { taskId: `demo-${Date.now()}`, needClarify: false },
   )
 }
 
@@ -64,7 +72,6 @@ export async function submitClarify(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answers }),
     },
-    { ok: true },
   )
 }
 

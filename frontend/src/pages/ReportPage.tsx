@@ -1,3 +1,4 @@
+import { BullMark } from '../components/BullMark'
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -235,7 +236,7 @@ export default function ReportPage() {
   ]
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-bg">
+    <div className="report-page flex h-screen w-screen overflow-hidden bg-bg">
       {/* 左：目录 TOC */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-card/50 lg:flex">
         <div className="flex h-14 items-center gap-2 border-b border-line px-5">
@@ -296,13 +297,14 @@ export default function ReportPage() {
         {/* 杂志封面 */}
         <div className="relative overflow-hidden">
           <img
-            src={r.cover_image ?? '/assets/brand/report-cover.png'}
+            src="/assets/brand/report-cover.svg"
             alt="cover"
             className="h-60 w-full object-cover"
             onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8">
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-widest text-white/90"><BullMark size={22} /> RivalBull · 牛牛调研报告</div>
             <motion.h1
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -313,11 +315,12 @@ export default function ReportPage() {
             <p className="mt-2 max-w-2xl text-aux text-white/85">{r.subtitle}</p>
             <div className="mt-3 flex flex-wrap items-center gap-4 text-tag text-white/75">
               <span className="inline-flex items-center gap-1"><Calendar size={13} /> {r.created_at}</span>
-              <span className="inline-flex items-center gap-1"><Users size={13} /> {r.experts.length} 位专家</span>
+              {r.model_selection && <span>模型：{r.model_selection === 'auto' ? '自动分工' : r.model_selection}</span>}
+              <span className="inline-flex items-center gap-1"><Users size={13} /> {r.experts.length} 位牛牛专家</span>
               <span className="inline-flex items-center gap-1"><Quote size={13} /> {r.claims.length} 条结论 · {r.evidence.length} 条证据</span>
             </div>
           </div>
-          <div className="absolute right-6 top-6 flex items-center gap-2">
+          <div className="report-actions absolute right-6 top-6 flex items-center gap-2">
             <button
               onClick={() => navigate('/knowledge')}
               className="inline-flex items-center gap-1.5 rounded-btn bg-card/90 px-3 h-9 text-aux font-medium text-ink-2 backdrop-blur hover:text-primary-deep"
@@ -649,7 +652,7 @@ export default function ReportPage() {
                   <div key={i} className="rounded-card border border-line/60 bg-bg p-3">
                     <div className="text-aux font-semibold text-ink">{g.term}</div>
                     <p className="mt-1 text-tag leading-relaxed text-ink-2">{g.definition}</p>
-                    {g.source && <div className="mt-1 text-tag text-primary-deep">— {g.source}</div>}
+                    {g.source && <div className="mt-1 text-tag text-primary-deep">— {g.source === 'Verda 四铁律' ? 'RivalBull 四铁律' : g.source}</div>}
                   </div>
                 ))}
               </div>

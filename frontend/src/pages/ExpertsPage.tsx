@@ -8,16 +8,16 @@ import { fadeUp, stagger } from '../lib/motion'
 import type { Expert, ExpertLevel } from '../types'
 
 const LEVEL_TABS: { key: ExpertLevel | 'all'; label: string; desc: string }[] = [
-  { key: 'all', label: '全部', desc: '48 位专家' },
+  { key: 'all', label: '全部', desc: '48 位牛牛专家' },
   { key: 'L3', label: '决策层', desc: '3 位 · 统筹终审' },
   { key: 'L2', label: '策略层', desc: '9 位 · 方法顾问' },
   { key: 'L1', label: '执行层', desc: '36 位 · 行业职能' },
 ]
 
 const LEVEL_BG: Record<ExpertLevel, string> = {
-  L1: 'bg-[#EAF1EA]',
-  L2: 'bg-[#FBF6E9]',
-  L3: 'bg-[#F4E2B8]',
+  L1: 'bg-[#e8efdb]',
+  L2: 'bg-[#fff4d9]',
+  L3: 'bg-[#f6d78c]',
 }
 
 function ExpertCard({ expert, onClick }: { expert: Expert; onClick: () => void }) {
@@ -25,7 +25,7 @@ function ExpertCard({ expert, onClick }: { expert: Expert; onClick: () => void }
     <motion.button
       variants={fadeUp}
       onClick={onClick}
-      className="group relative flex flex-col items-center rounded-card border border-line/60 bg-card p-4 text-center shadow-card transition-all hover:-translate-y-1 hover:shadow-float"
+      className="cow-card group relative flex flex-col items-center rounded-card border p-4 pb-5 text-center transition-all hover:-translate-y-1 hover:shadow-float"
     >
       <span className={`absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-chip px-2 h-5 text-tag font-medium text-ink-2 ${LEVEL_BG[expert.level]}`}>
         {expert.level}
@@ -34,7 +34,7 @@ function ExpertCard({ expert, onClick }: { expert: Expert; onClick: () => void }
         <img
           src={expert.avatar}
           alt={expert.name}
-          className="h-16 w-16 rounded-full object-cover shadow-card ring-2 ring-card"
+          className="h-24 w-24 rounded-[28px] object-cover ring-4 ring-bg"
         />
         <span className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-card text-primary shadow-card">
           <DomainIcon name={expert.domain_icon} size={13} />
@@ -68,9 +68,11 @@ export default function ExpertsPage() {
 
   return (
     <div className="mx-auto max-w-content px-8 py-8">
-      <header className="flex flex-col gap-1">
-        <h1 className="font-serif text-h1 text-ink">专家公会</h1>
-        <p className="text-aux text-ink-2">48 位 AI 竞品分析专家 · 三层协作架构 · 决策 / 策略 / 执行</p>
+      <header className="pasture-banner">
+        <div><p className="mb-2 text-[11px] font-bold tracking-[.16em] text-primary">MEET THE HERD</p>
+        <h1 className="text-[32px] font-bold text-ink">牛牛牧场</h1>
+        <p className="mt-2 text-aux text-ink-2">48 位牛牛专家，各有所长。钟钟牛带队，一起把问题研究透。</p></div>
+        <img src="/assets/brand/pasture.svg" alt="" />
       </header>
 
       {/* 搜索 + tab */}
@@ -84,7 +86,7 @@ export default function ExpertsPage() {
             className="w-56 bg-transparent text-aux text-ink outline-none placeholder:text-ink-3"
           />
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
           {LEVEL_TABS.map((t) => (
             <button
               key={t.key}
@@ -106,7 +108,7 @@ export default function ExpertsPage() {
         variants={stagger}
         initial="initial"
         animate="animate"
-        className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+        className="mt-6 grid grid-cols-1 gap-4 min-[430px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
       >
         {filtered.map((e) => (
           <ExpertCard key={e.id} expert={e} onClick={() => navigate(`/experts/${e.id}`)} />

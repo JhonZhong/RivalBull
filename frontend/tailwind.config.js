@@ -1,23 +1,23 @@
 /** @type {import('tailwindcss').Config} */
 
-// Verda 莫兰迪设计 token —— 同时提供「扁平命名」(handbook 可粘贴) 与 `verda-` 命名空间
+// RivalBull 牧场设计 token —— 同时提供「扁平命名」(handbook 可粘贴) 与 `bull-` 命名空间
 const palette = {
-  primary: '#7C9885',
-  'primary-soft': '#A8C0A8',
-  'primary-tint': '#EAF1EA',
-  'primary-deep': '#5E7A66',
-  sun: '#F4E2B8',
-  'sun-soft': '#FBF6E9',
-  ink: '#3A413C',
-  'ink-2': '#6B746C',
-  'ink-3': '#9AA39C',
-  line: '#E3E8E3',
-  bg: '#FAFBF9',
+  primary: '#547548',
+  'primary-soft': '#afc69a',
+  'primary-tint': '#e8efdb',
+  'primary-deep': '#3f6036',
+  sun: '#f6d78c',
+  'sun-soft': '#fff4d9',
+  ink: '#34402f',
+  'ink-2': '#626b58',
+  'ink-3': '#818777',
+  line: '#e0e3d3',
+  bg: '#faf8ef',
   card: '#FFFFFF',
-  ok: '#8AB58A',
-  warn: '#E0B775',
-  risk: '#CE9A92',
-  info: '#8FA8C0',
+  ok: '#789b61',
+  warn: '#c99a44',
+  risk: '#bb7665',
+  info: '#759aa8',
 }
 
 export default {
@@ -26,7 +26,7 @@ export default {
     extend: {
       colors: {
         ...palette,
-        verda: palette,
+        bull: palette,
       },
       borderRadius: {
         card: '16px',
@@ -39,7 +39,7 @@ export default {
         glow: '0 0 0 4px rgba(124,152,133,0.12)',
       },
       fontFamily: {
-        sans: ['Inter', 'Noto Sans SC', 'PingFang SC', 'sans-serif'],
+        sans: ['Nunito', 'Noto Sans SC', 'PingFang SC', 'sans-serif'],
         serif: ['Noto Serif SC', 'Georgia', 'serif'],
         mono: ['JetBrains Mono', 'SFMono-Regular', 'monospace'],
       },
@@ -59,7 +59,7 @@ export default {
         read: '760px',
       },
       transitionTimingFunction: {
-        verda: 'cubic-bezier(.4,0,.2,1)',
+        bull: 'cubic-bezier(.4,0,.2,1)',
       },
       keyframes: {
         breath: { '0%,100%': { opacity: '1' }, '50%': { opacity: '.55' } },

@@ -1,7 +1,8 @@
+import { BullMark } from '../components/BullMark'
 import { useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Sprout, ArrowRight, SkipForward } from 'lucide-react'
+import { ArrowRight, SkipForward } from 'lucide-react'
 import type { ClarifyQuestion } from '../types'
 import { submitClarify } from '../lib/api'
 import { VSunGlow } from '../components/ui'
@@ -20,13 +21,13 @@ export default function ClarifyPage() {
   const questions = state?.clarify ?? []
   const [answers, setAnswers] = useState<Record<string, unknown>>({})
   const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
   // 用户自定义补充的竞品（按题 id 存，目前主要用于 competitors 题）
   const [customInputs, setCustomInputs] = useState<Record<string, string>>({})
 
   // 无澄清问题（如直接刷新进入）：直接进工作台
   if (!taskId || questions.length === 0) {
-    navigate(`/workspace/${taskId}`, { replace: true, state: { query } })
-    return null
+    return <Navigate to={taskId ? `/workspace/${taskId}` : '/'} replace state={{ query }} />
   }
 
   function setSingle(qid: string, val: string) {
@@ -59,10 +60,14 @@ export default function ClarifyPage() {
   async function go() {
     if (submitting || !taskId) return
     setSubmitting(true)
+    setError('')
     try {
       await submitClarify(taskId, answers)
-    } finally {
       navigate(`/workspace/${taskId}`, { state: { query } })
+    } catch {
+      setError('暂时未能保存调研范围，请稍后重试。')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -72,11 +77,11 @@ export default function ClarifyPage() {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-[680px] flex-col justify-center px-6 py-16">
         <motion.div variants={fadeUp} initial="initial" animate="animate" className="flex items-center gap-2.5">
           <span className="grid h-10 w-10 place-items-center rounded-btn bg-primary-tint text-primary">
-            <Sprout size={22} strokeWidth={1.8} />
+            <BullMark size={22} strokeWidth={1.8} />
           </span>
           <div>
             <div className="text-h3 text-ink">在开始前，请确认几个关键点</div>
-            <div className="text-aux text-ink-2">这能帮助专家队更精准地锁定调研范围</div>
+            <div className="text-aux text-ink-2">这能帮助牛牛团队更精准地锁定调研范围</div>
           </div>
         </motion.div>
 
@@ -158,6 +163,7 @@ export default function ClarifyPage() {
           ))}
         </motion.div>
 
+        {error && <p role="alert" className="mt-5 text-aux text-risk">{error}</p>}
         <div className="mt-7 flex items-center justify-between">
           <button
             onClick={go}
@@ -170,7 +176,7 @@ export default function ClarifyPage() {
             disabled={submitting}
             className="inline-flex items-center justify-center gap-2 rounded-btn bg-primary px-6 h-12 font-medium text-white shadow-card transition-all hover:bg-primary-deep hover:shadow-float active:scale-95 disabled:opacity-50"
           >
-            {submitting ? '正在派遣专家队…' : '启动调研'}
+            {submitting ? '正在派遣牛牛团队…' : '启动调研'}
             <ArrowRight size={18} />
           </button>
         </div>

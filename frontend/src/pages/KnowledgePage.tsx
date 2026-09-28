@@ -107,10 +107,10 @@ export default function KnowledgePage() {
       {/* 内容 */}
       {filtered.length === 0 ? (
         <div className="mt-16 flex flex-col items-center justify-center gap-3 text-center text-ink-3">
-          <Library size={40} strokeWidth={1.4} />
+          <img src="/assets/avatars/L1-036.svg" alt="宝藏牛陪你收藏知识" className="h-28 w-28 rounded-[28px]" />
           <p className="text-aux">
             {knowledge.length === 0
-              ? '知识库还是空的。打开任意报告，选中文字或点击「收入知识库」即可沉淀洞察。'
+              ? '宝藏牛的书架还是空的。打开任意报告，选中文字或点击「收入知识库」即可沉淀洞察。'
               : '没有匹配的内容，换个关键词试试。'}
           </p>
         </div>

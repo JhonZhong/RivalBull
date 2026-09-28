@@ -11,7 +11,7 @@ export function VCard({
 }: { children: ReactNode; className?: string; hover?: boolean } & HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`bg-card rounded-card shadow-card p-6 border border-line/60 transition-all duration-300 ease-verda ${
+      className={`bg-card rounded-card shadow-card p-6 border border-line/60 transition-all duration-300 ease-bull ${
         hover ? 'hover:shadow-float hover:-translate-y-0.5' : ''
       } ${className}`}
       {...rest}
@@ -32,7 +32,7 @@ export function VButton({
   variant?: 'primary' | 'ghost' | 'soft'
 } & ButtonHTMLAttributes<HTMLButtonElement>) {
   const base =
-    'inline-flex items-center justify-center gap-2 px-5 h-11 rounded-btn font-medium text-sm transition-all duration-200 ease-verda active:scale-95 disabled:opacity-50 disabled:pointer-events-none'
+    'inline-flex items-center justify-center gap-2 px-5 h-11 rounded-btn font-medium text-sm transition-all duration-200 ease-bull active:scale-95 disabled:opacity-50 disabled:pointer-events-none'
   const styles =
     variant === 'primary'
       ? 'bg-primary text-white hover:bg-primary-deep shadow-card hover:shadow-float'
@@ -86,7 +86,7 @@ export function VSunGlow({ className = '' }: { className?: string }) {
         height: 520,
         top: -160,
         right: -120,
-        background: 'radial-gradient(circle, #F4E2B8 0%, rgba(244,226,184,0) 70%)',
+        background: 'radial-gradient(circle, #f6d78c 0%, rgba(244,226,184,0) 70%)',
         opacity: 0.5,
         filter: 'blur(8px)',
       }}

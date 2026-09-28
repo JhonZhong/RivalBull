@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title">
+<title id="title">安稳牛 · 合规风控</title>
+<rect width="200" height="200" rx="40" fill="#E6E1C7"/>
+<path d="M0 162Q55 135 103 159t97-4v45H0" fill="#82985B" opacity=".13"/>
+<path d="M47 205v-34q0-35 56-35t56 35v34" fill="#82985B"/>
+<path d="m82 141 21 21 21-21M102 163v34" fill="#FFFAEB"/>
+<g stroke="#634E3E" stroke-width="3" stroke-linejoin="round">
+<path d="M70 63Q45 50 55 24q7 22 27 21M134 63q26-13 17-39-7 22-27 21" fill="#EAC789"/>
+<path d="M65 71Q22 52 28 81q7 25 39 16M139 71q43-19 37 10-7 25-39 16" fill="#FFFAEB"/>
+<path d="M59 79Q37 67 38 82q5 12 23 9M145 79q22-12 21 3-5 12-23 9" fill="#EFB49F" stroke="none"/>
+<path d="M56 88q0-43 47-43t47 43v25q0 40-47 40t-47-40Z" fill="#FFFAEB"/>
+</g><path d="M65 50Q63 82 84 83Q100 72 92 45Z" fill="#596779"/>
+<ellipse cx="73" cy="112" rx="9" ry="5" fill="#F0BBA5"/><ellipse cx="134" cy="112" rx="9" ry="5" fill="#F0BBA5"/>
+<g fill="#483F34"><ellipse cx="82" cy="96" rx="3.5" ry="5"/><ellipse cx="124" cy="96" rx="3.5" ry="5"/></g>
+<rect x="67" y="112" width="73" height="39" rx="20" fill="#F0BBA5" stroke="#634E3E" stroke-width="3"/>
+<ellipse cx="87" cy="127" rx="3" ry="4" fill="#8C5D4A"/><ellipse cx="120" cy="127" rx="3" ry="4" fill="#8C5D4A"/>
+<path d="M97 137q6 5 12 0" fill="none" stroke="#8C5D4A" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="157" cy="163" r="28" fill="#FFFAEB" stroke="#82985B" stroke-width="3"/>
+<g transform="translate(140 146) scale(1.4)" stroke="#634E3E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="m12 2 9 4v7q-1 6-9 9Q4 19 3 13V6Z" fill="#C9DDA7"/><path d="m7 11 4 4 6-7"/></g>
+</svg>

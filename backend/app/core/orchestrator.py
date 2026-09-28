@@ -1,4 +1,4 @@
-"""Verda 深度调研编排引擎（真实大脑，对标 Deep Research）。
+"""RivalBull 深度调研编排引擎（真实大脑，对标 Deep Research）。
 
 节点：intake → orchestrator → collect → analyze → write → audit →(pass/rework)→ done
 
@@ -10,7 +10,7 @@
 - 真实持久化：任务/报告/证据/专家工作量/trace 全部落 SQLite。
 - 全程 trace + 四铁律：无证据不立论 / 交叉验证 / 返工闭环 / 可观测。
 
-模型分配（充分利用并发额度）：核心章 glm-5.2、辅助章 glm-5.1、杂务 glm-z1-air。
+模型分配由服务配置提供；默认核心 Pro、辅助/杂务 Flash，任务可选择单模型。
 写作阶段 9-11 章并行（asyncio.gather），逐章实时进度。
 调研模式三档（快速/深度/专家级）按搜索量+章节数+模型分档。
 """
@@ -30,6 +30,7 @@ from app.core import db
 from app.core import trace
 from app.core.audit import evaluate_quality, decide_rework, llm_quality_review
 from app.core.config import get_settings
+from app.core.model_selection import model_scope, resolve_model, validate_selection
 from app.core.credibility import score_evidence, freshness_days
 from app.core.fetcher import domain_of, fetch_page
 from app.core.llm import chat, chat_json, LLMNotConfigured, TOKEN_USAGE
@@ -94,17 +95,19 @@ MODE_CONFIG = {
 def _model(tier: str) -> str:
     """tier: 'core' | 'aux' | 'fast' → 实际模型名。"""
     if tier == "core":
-        return _settings.zhipu_model_core
+        return resolve_model(_settings.llm_model_core)
     if tier == "fast":
-        return _settings.zhipu_model_fast
-    return _settings.zhipu_model_aux
+        return resolve_model(_settings.llm_model_fast)
+    return resolve_model(_settings.llm_model_aux)
 
 
 # ── 任务创建 / 澄清（落库）─────────────────────────────────
-def create_task(query: str, mode: str = "deep") -> Dict[str, Any]:
+def create_task(query: str, mode: str = "deep", model: str = "auto") -> Dict[str, Any]:
     task_id = _sid("t")
-    questions = _clarify_questions(query)
-    db.save_task(task_id, query, {"_mode": mode})
+    selection = validate_selection(model)
+    with model_scope(selection):
+        questions = _clarify_questions(query)
+    db.save_task(task_id, query, {"_mode": mode, "_model": selection})
     return {"taskId": task_id, "needClarify": True, "clarifyQuestions": questions}
 
 
@@ -112,9 +115,8 @@ def submit_clarify(task_id: str, answers: Dict[str, Any]) -> Dict[str, Any]:
     # 保留已存的 _mode
     task = db.get_task(task_id) or {}
     prev = task.get("clarifications", {}) or {}
-    merged = {**answers}
-    if "_mode" in prev and "_mode" not in merged:
-        merged["_mode"] = prev["_mode"]
+    merged = {k: v for k, v in answers.items() if not k.startswith("_")}
+    merged.update({k: v for k, v in prev.items() if k.startswith("_")})
     db.update_task_clarify(task_id, merged)
     return {"ok": True}
 
@@ -156,7 +158,7 @@ def refine_section(report_id: str, section_id: str, annotations: List[str]) -> D
                 )},
             ],
             max_tokens=6000, temperature=0.7,
-            model=_model("core"), purpose=f"按批注深化章节：{target.get('title','')}",
+            model=(validate_selection(rep.get("model_selection", "auto")) if rep.get("model_selection", "auto") != "auto" else _model("core")), purpose=f"按批注深化章节：{target.get('title','')}",
         )
         if isinstance(data, dict) and data.get("paragraphs"):
             paras = [str(p).strip() for p in data["paragraphs"] if str(p).strip()]
@@ -232,11 +234,11 @@ def _discover_scope(query: str) -> Dict[str, Any]:
     """领域识别 + 竞品自动发现（前置侦察）。
 
     返回 {"subject": 调研对象, "domain": 所属领域, "competitors": [候选竞品...]}。
-    用 aux 模型（glm-5.1，已关思考、JSON 稳定）；失败重试一次再正则兜底。
+    用配置的 aux 模型；失败重试一次再正则兜底。
     """
     msgs = [
         {"role": "system", "content": (
-            "你是竞品分析调研总监，负责开题前的『领域识别 + 竞品发现』。"
+            "你是 RivalBull 董事长钟钟牛，负责统筹竞品分析调研，负责开题前的『领域识别 + 竞品发现』。"
             "根据用户一句话需求，判断：①真正的调研对象是什么（产品/公司/品类全称）；"
             "②它属于什么细分领域/赛道；③在该赛道里，尽可能多地列出与之直接竞争的真实竞品（8-12 个，"
             "必须是真实存在、可搜索的产品/公司名，按知名度从高到低排列，不要编造）。"
@@ -277,7 +279,7 @@ def _plan_research(query: str, clar: Dict[str, Any], max_angles: int = 7) -> Dic
         data = chat_json(
             [
                 {"role": "system", "content": (
-                    "你是竞品分析调研总监。拆解用户的调研需求，输出 JSON："
+                    "你是 RivalBull 董事长钟钟牛，负责统筹竞品分析调研。拆解用户的调研需求，输出 JSON："
                     '{"subject":"本次调研的核心对象全称",'
                     '"category":"该对象所属的细分品类/领域（用于消歧，如 AI编程工具、知识管理软件、新能源汽车）",'
                     '"brands":["竞品全称1","竞品全称2"],'
@@ -353,7 +355,7 @@ def _dispatch_experts(query: str, brands: List[str], focus: List[str]) -> Dict[s
         data = chat_json(
             [
                 {"role": "system", "content": (
-                    "你是 Verda 首席指挥官。从专家名册中为本次调研挑选最合适的团队。"
+                    "你是 RivalBull 董事长钟钟牛。从专家名册中为本次调研挑选最合适的团队。"
                     "规则：必须含 1 位 L3 决策层统筹、1-2 位 L2 策略顾问、3-6 位 L1 执行专家。"
                     "为每位被选专家给出一句具体的指派理由（说明他/她负责什么、为什么适合）。"
                     '只输出 JSON：{"lead":"专家id","members":[{"id":"专家id","reason":"指派理由"}]}。'
@@ -562,6 +564,27 @@ def _collect_brand(brand: str, angles: List[str], collector: str,
 
 # ── 主流程 ───────────────────────────────────────────────
 async def run_pipeline(task_id: str, sub_id: str = "") -> AsyncIterator[Dict[str, Any]]:
+    task = db.get_task(task_id)
+    if not task:
+        yield _ev("error", {"message": "任务不存在，请返回牧场重新发起调研。"})
+        return
+    selection = (task.get("clarifications") or {}).get("_model", "auto")
+    pipeline = _run_pipeline(task_id, sub_id)
+    try:
+        while True:
+            # Exit the scope BEFORE yielding to the SSE consumer. Parallel
+            # chapter jobs and to_thread workers inherit the selected model.
+            with model_scope(selection):
+                try:
+                    event = await anext(pipeline)
+                except StopAsyncIteration:
+                    break
+            yield event
+    finally:
+        await pipeline.aclose()
+
+
+async def _run_pipeline(task_id: str, sub_id: str = "") -> AsyncIterator[Dict[str, Any]]:
     task = db.get_task(task_id) or {"query": "竞品分析", "clarifications": {}}
     query = task.get("query", "竞品分析")
     clar = task.get("clarifications", {}) or {}
@@ -619,7 +642,7 @@ async def run_pipeline(task_id: str, sub_id: str = "") -> AsyncIterator[Dict[str
     member_ids = [m["id"] for m in dispatch["members"]]
     lead_expert = expert_by_id(dispatch["lead"]) or {}
     yield _ev("thought", {"id": _sid("th"), "kind": "dispatch", "expert": "L3-001",
-                          "text": f"由 {lead_expert.get('name','决策层')} 领衔组建 {len(member_ids)} 人专家队，"
+                          "text": f"由 {lead_expert.get('name','决策层')} 领衔组建 {len(member_ids)} 位牛牛专家组成的团队，"
                                   f"按调研主题精准匹配专长。", "ts": _now()})
     for m in dispatch["members"]:
         ex = expert_by_id(m["id"]) or {}
@@ -632,7 +655,7 @@ async def run_pipeline(task_id: str, sub_id: str = "") -> AsyncIterator[Dict[str
                            receiver="collect", task_type="PRODUCE",
                            payload={"brands": brands, "angles": angles})
     yield _ev("message", {"id": _sid("m"), "kind": "team", "expert": "L3-001",
-                          "members": member_ids, "text": "专家队已就位，开始深度采集。",
+                          "members": member_ids, "text": "牛牛团队已就位，开始深度采集。",
                           "dispatch": dispatch["members"],
                           "envelope": {"sender": env_collect.sender, "receiver": env_collect.receiver,
                                        "task_type": env_collect.task_type,
@@ -960,7 +983,7 @@ async def run_pipeline(task_id: str, sub_id: str = "") -> AsyncIterator[Dict[str
         insert_pos = section_ids.index("conclusion") if "conclusion" in section_ids else len(section_ids)
         section_ids.insert(insert_pos, persp_sid)
     yield _ev("thought", {"id": _sid("th"), "kind": "plan", "expert": writer,
-                          "text": f"首席分析师启动 {len(section_ids)} 章并行撰写（核心章 {_model('core')} / 辅助章 {_model('aux')}）。",
+                          "text": f"首席分析师慧眼牛启动 {len(section_ids)} 章并行撰写（核心章 {_model('core')} / 辅助章 {_model('aux')}）。",
                           "ts": _now()})
 
     # 并行生成各章
@@ -1031,6 +1054,7 @@ async def run_pipeline(task_id: str, sub_id: str = "") -> AsyncIterator[Dict[str
     report["audit_review"] = {"before": review_before, "after": review_after,
                               "rework_rounds": rework_rounds_done,
                               "issues_resolved": issues_resolved}
+    report["model_selection"] = clar.get("_model", "auto")
     db.save_report(report, task_id=task_id)
     db.save_traces(task_id, report["id"], trace_spans)
     db.mark_task_done(task_id, report["id"])
@@ -1244,7 +1268,7 @@ def _normalize_perspective(raw: str) -> str:
         return "user"
     return ""  # 通用/综合：不加专属板块
 
-# 核心章用 glm-5.2（质量最高），其余用 glm-5.1
+# 自动分工：核心章用 core 配置，其余用 aux 配置；手动选择覆盖两者
 CORE_SECTIONS = {"summary", "feature", "pricing", "conclusion", "contrarian", "moat"}
 
 SECTION_PROMPTS = {
@@ -1723,16 +1747,13 @@ def _assemble_report(query, brands, focus, dispatch, claims, evidences, images,
 
     toc = [{"id": s["id"], "title": s["title"], "level": 1} for s in sections]
     glossary = [
-        {"term": "交叉验证", "definition": "同一结论由 ≥2 个独立来源支撑，判为高置信。", "source": "Verda 四铁律"},
-        {"term": "无证据不立论", "definition": "任何数据型结论必须挂载 evidence_ids，否则标记待验证。", "source": "Verda 四铁律"},
+        {"term": "交叉验证", "definition": "同一结论由 ≥2 个独立来源支撑，判为高置信。", "source": "RivalBull 四铁律"},
+        {"term": "无证据不立论", "definition": "任何数据型结论必须挂载 evidence_ids，否则标记待验证。", "source": "RivalBull 四铁律"},
         {"term": "观点阵营", "definition": "将相同立场的真实用户观点聚类，输出归一化占比与代表评论。", "source": "舆情管线"},
         {"term": "SCP 框架", "definition": "结构(Structure)-行为(Conduct)-绩效(Performance)，产业经济学经典分析范式。", "source": "Bain/Scherer"},
         {"term": "波特五力", "definition": "从现有竞争、新进入者、替代品、买方与供应商议价五个方向量化行业竞争压力。", "source": "Michael Porter"},
     ]
-    cover_brand = "+".join(brands[:3])
-    cover = ("https://copilot-cn.bytedance.net/api/ide/v1/text_to_image?"
-             f"prompt=minimalist%20business%20competitive%20analysis%20report%20cover%2C%20"
-             f"morandi%20sage%20green%2C%20{cover_brand}&image_size=landscape_16_9")
+    cover = "/assets/brand/report-cover.svg"
 
     evidence_dicts = []
     for e in evidences:
