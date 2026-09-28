@@ -99,6 +99,16 @@
 
 ## 验证
 
+### PR #2 审阅修复（2026-09-28）
+
+- 部署入口补齐 `model = "auto"`，与本地入口保持一致；默认、自动、Pro、Flash 均可建任务，非法/未启用模型返回 422。
+- 仅配置旧智谱密钥时保留完整智谱默认地址和模型；现代密钥、显式地址与模型的优先级见 [部署说明](DEPLOYMENT.md)。
+- 流水线改用 Python 3.9 支持的异步迭代器方法；牛牛图标正确使用调用方传入的线宽。
+- 启动脚本核对 RivalBull 身份、模型目录及请求 schema，拒绝复用缺少能力的旧服务。
+- 后端 14 项顶层测试通过，其中两个隔离子进程分别执行本地/部署入口的 7 项接口与配置契约测试；覆盖临时数据库持久化、仅旧密钥、dotenv、配置优先级及非法模型。
+- 6 项启动探测检查、8 项浏览器回归、lint、生产构建通过；构建仍提示现有大体积 bundle。本轮使用 Python 3.12，通过屏蔽内置 `anext` 检查该兼容性回归，未在 Python 3.9 实机执行完整套件。
+- SQLite 写入触发 reload 的评论未获当前配置支持：已核验 Uvicorn 文件过滤器不会接受 `.db`、`.db-wal`、`.db-shm`，故保留开发重载行为。验证使用模拟模型，不产生付费调研请求。
+
 在 `frontend/` 运行 `npm run lint`、`npm run build`、`npm run test:ui`。浏览器验证需要 Chrome，可在 playwright.config.ts 修改 channel 使用已安装的 Chromium。
 
 在 `backend/` 使用已安装依赖的 Python 运行 `python -m unittest discover -s tests -v`。

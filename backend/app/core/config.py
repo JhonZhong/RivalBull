@@ -2,7 +2,7 @@
 import os
 from functools import lru_cache
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # 用绝对路径定位 backend/.env，避免因启动工作目录不同而读不到密钥。
@@ -18,11 +18,28 @@ class Settings(BaseSettings):
         env_file=_ENV_FILE, env_file_encoding="utf-8", extra="ignore"
     )
 
+    @model_validator(mode="after")
+    def preserve_legacy_provider_defaults(self):
+        """旧密钥必须沿用整套智谱默认值；显式配置始终优先。"""
+        if "legacy_api_key" in self.model_fields_set and "llm_api_key" not in self.model_fields_set:
+            self.llm_api_key = self.legacy_api_key
+            defaults = {
+                "llm_base_url": "https://open.bigmodel.cn/api/paas/v4",
+                "llm_model": "glm-5.1", "llm_model_core": "glm-5.2",
+                "llm_model_aux": "glm-5.1", "llm_model_fast": "glm-z1-air",
+            }
+            for field, default in defaults.items():
+                if field not in self.model_fields_set:
+                    setattr(self, field, default)
+        return self
+
     # OpenAI 兼容服务：新部署使用 LLM_*，同时兼容旧的 ZHIPU_* 配置。
     llm_api_key: str = Field(
         default="", repr=False,
-        validation_alias=AliasChoices("LLM_API_KEY", "MIMO_API_KEY", "ZHIPU_API_KEY"),
+        validation_alias=AliasChoices("LLM_API_KEY", "MIMO_API_KEY"),
     )
+    # 单独保留旧密钥来源，避免 AliasChoices 归一化后丢失供应商身份。
+    legacy_api_key: str = Field(default="", repr=False, exclude=True, validation_alias="ZHIPU_API_KEY")
     llm_model: str = Field(
         default="mimo-v2.6-flash", validation_alias=AliasChoices("LLM_MODEL", "ZHIPU_MODEL"),
     )

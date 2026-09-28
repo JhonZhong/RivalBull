@@ -576,7 +576,7 @@ async def run_pipeline(task_id: str, sub_id: str = "") -> AsyncIterator[Dict[str
             # chapter jobs and to_thread workers inherit the selected model.
             with model_scope(selection):
                 try:
-                    event = await anext(pipeline)
+                    event = await pipeline.__anext__()
                 except StopAsyncIteration:
                     break
             yield event

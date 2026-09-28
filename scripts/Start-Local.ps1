@@ -14,14 +14,18 @@ function Test-Backend {
     try {
         $health = Invoke-RestMethod "$backendUrl/health" -TimeoutSec 2
         $info = Invoke-RestMethod "$backendUrl/" -TimeoutSec 2
-        return ($health.status -eq 'ok' -and $info.name -match '(RivalBull|Verda) API')
+        if ($health.status -ne 'ok' -or $info.name -ne 'RivalBull API') { return $false }
+        $models = Invoke-RestMethod "$backendUrl/api/models" -TimeoutSec 2
+        $schema = Invoke-RestMethod "$backendUrl/openapi.json" -TimeoutSec 2
+        return (@($models.options | Where-Object { $_.id -eq 'auto' -and $_.available }).Count -eq 1 -and
+                $schema.components.schemas.CreateTaskBody.properties.model.default -eq 'auto')
     } catch { return $false }
 }
 
 function Test-Frontend {
     try {
         $page = Invoke-WebRequest "$frontendUrl/" -UseBasicParsing -TimeoutSec 2
-        return ($page.StatusCode -eq 200 -and $page.Content -match '(RivalBull|Verda)' -and
+        return ($page.StatusCode -eq 200 -and $page.Content -match '<title>RivalBull[^<]*</title>' -and
                 $page.Content -match '/@vite/client')
     } catch { return $false }
 }

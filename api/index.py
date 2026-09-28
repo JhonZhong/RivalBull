@@ -127,6 +127,7 @@ def get_expert(eid: str):
 class CreateTaskBody(BaseModel):
     query: str
     mode: str = "deep"
+    model: str = "auto"
 
 
 @app.post("/api/tasks")

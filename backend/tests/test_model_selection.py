@@ -89,11 +89,12 @@ class ConcurrencyTests(unittest.IsolatedAsyncioTestCase):
             return events
         with patch.object(models, 'get_settings', return_value=SETTINGS), \
              patch.object(db, 'get_task', side_effect=lambda tid: {'clarifications': {'_model': tid}}), \
+             patch('builtins.anext', None, create=True), \
              patch.object(orch, '_run_pipeline', fake_pipeline):
             results = await asyncio.gather(consume('mimo-v2.6-pro'), consume('mimo-v2.6-flash'), consume('auto'))
             self.assertEqual(results, [['mimo-v2.6-pro'] * 2, ['mimo-v2.6-flash'] * 2, ['auto-tier'] * 2])
             stream = orch.run_pipeline('mimo-v2.6-pro')
-            await anext(stream)
+            await stream.__anext__()
             await stream.aclose()
             self.assertEqual(models.resolve_model('after-close'), 'after-close')
 
